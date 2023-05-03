@@ -12,7 +12,7 @@ class CookieStore(eero.SessionStorage):
         self.cookie_file = os.path.abspath(cookie_file)
 
         try:
-            with open(self.cookie_file, "r") as f:
+            with open(self.cookie_file, "r", encoding="utf-8") as f:
                 self.__cookie = f.read()
         except IOError:
             self.__cookie = None
@@ -24,7 +24,7 @@ class CookieStore(eero.SessionStorage):
     @cookie.setter
     def cookie(self, cookie):
         self.__cookie = cookie
-        with open(self.cookie_file, "w+") as f:
+        with open(self.cookie_file, "w+", encoding="utf-8") as f:
             f.write(self.__cookie)
 
 
@@ -59,7 +59,9 @@ class EeroClient(eero.Eero):
             new_device = {}
             for key in self.device_model_fields:
                 new_device[key] = device[key]
-            devices.append(EeroClientDevice(**new_device))
+            new_device['nickname'] = device['nickname'] or device['hostname']
+            if new_device['nickname']:
+                devices.append(EeroClientDevice(**new_device))
         for device in self.eeros(network):
             new_device = {}
             for key in self.eero_model_fields:

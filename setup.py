@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 
-with open("requirements.txt", "r") as infile:
+with open("requirements.txt", "r", encoding="utf-8") as infile:
     requirements = [i.strip() for i in infile.readlines()]
 
-with open("VERSION", "r") as infile:
+with open("VERSION", "r", encoding="utf-8") as infile:
     version = infile.read().strip()
 
-with open("README.md", "r") as infile:
+with open("README.md", "r", encoding="utf-8") as infile:
     long_description = infile.read()
 
 setup(
