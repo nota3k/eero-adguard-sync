@@ -29,7 +29,7 @@ class CookieStore(eero.SessionStorage):
 
 
 class EeroClient(eero.Eero):
-    device_model_fields = {"ips", "mac", "nickname", "device_type"}
+    device_model_fields = {"ips", "mac", "nickname", "hostname", "device_type"}
     eero_model_fields = {
         "mac_address",
         "ip_address",

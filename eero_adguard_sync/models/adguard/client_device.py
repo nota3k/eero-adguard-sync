@@ -43,6 +43,13 @@ class AdGuardClientDevice(DHCPClientDevice):
             except ValueError:
                 continue
         return ip_addresses
+    
+    @property
+    def hostname(self) -> str:
+        for identifier in self.ids:
+            if ((identifier.count('.') or identifier.count(':')) == 0):
+                return identifier
+        return ''
 
     @classmethod
     def from_dhcp_client(cls, dhcp_client: "DHCPClient") -> "AdGuardClientDevice":
@@ -59,6 +66,7 @@ class AdGuardClientDevice(DHCPClientDevice):
             mac_address=self.mac_address,
             ip_interfaces=self.ip_addresses,
             nickname=self.name,
+            hostname=self.hostname,
             instance=self,
             tags=self.tags,
         )

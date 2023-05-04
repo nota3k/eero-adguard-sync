@@ -1,4 +1,6 @@
 import ipaddress
+import string
+import re
 from typing import Union
 from dataclasses import dataclass, field
 
@@ -10,12 +12,18 @@ class DHCPClient:
     mac_address: macaddress.MAC
     ip_interfaces: list[Union[ipaddress.IPv4Interface, ipaddress.IPv6Interface]]
     nickname: str
+    hostname: str
     instance: object
     tags: list[str] = field(default_factory=list)
 
     @property
+    def simplifedNickname(self) -> str:
+        return re.sub('[^0-9a-zA-Z\ ]+', '', self.nickname).replace(' ', '-')
+
+    @property
     def identifiers(self) -> set[str]:
         identifiers = {str(self.mac_address)}
+        identifiers.add(self.hostname or self.simplifedNickname)
         for interface in self.ip_interfaces:
             identifiers.add(interface.ip.exploded)
             identifiers.add(interface.ip.compressed)

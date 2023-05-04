@@ -19,15 +19,17 @@ class EeroNetworkDevice:
 
     @property
     def nickname(self) -> str:
-        nickname = f"{self.location} {self.model}"
-        if self.gateway:
-            nickname += " (Gateway)"
-        return nickname
+        return f"{self.location} {self.model}"
+
+    @property
+    def hostname(self) -> str:
+        return (f"{self.location} {self.model}").replace(' ', '-').lower()
 
     def as_client_device(self) -> EeroClientDevice:
         return EeroClientDevice(
             ips=self.ips,
             nickname=self.nickname,
             mac=self.mac_address,
+            hostname=self.hostname,
             device_type="generic",
         )

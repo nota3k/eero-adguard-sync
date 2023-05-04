@@ -40,6 +40,7 @@ class EeroClientDevice(DHCPClientDevice):
     ips: list[str]
     mac: str
     nickname: str
+    hostname: str
     device_type: str
 
     @property
@@ -48,7 +49,7 @@ class EeroClientDevice(DHCPClientDevice):
 
     @property
     def identifiers(self) -> list[str]:
-        return [self.mac, *self.ips]
+        return [self.mac, *self.ips, self.hostname]
 
     @property
     def mac_address(self) -> macaddress.MAC:
@@ -71,6 +72,7 @@ class EeroClientDevice(DHCPClientDevice):
         return cls(
             ips=[str(i.ip) for i in dhcp_client.ip_interfaces],
             mac=str(dhcp_client.mac_address),
+            hostname=dhcp_client.hostname,
             nickname=dhcp_client.nickname,
             device_type=dhcp_client.tags[0],
         )
@@ -79,6 +81,7 @@ class EeroClientDevice(DHCPClientDevice):
         return DHCPClient(
             mac_address=self.mac_address,
             ip_interfaces=self.ip_addresses,
+            hostname=self.hostname,
             nickname=self.nickname,
             instance=self,
             tags=[self.standard_device_type],
