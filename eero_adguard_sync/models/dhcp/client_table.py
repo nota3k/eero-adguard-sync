@@ -23,7 +23,7 @@ class DHCPClient:
     @property
     def identifiers(self) -> set[str]:
         identifiers = {str(self.mac_address)}
-        identifiers.add(self.hostname or self.simplifedNickname)
+        identifiers.add(self.simplifedNickname or self.hostname)
         for interface in self.ip_interfaces:
             identifiers.add(interface.ip.exploded)
             identifiers.add(interface.ip.compressed)
