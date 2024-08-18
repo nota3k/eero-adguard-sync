@@ -10,44 +10,15 @@ from eero_adguard_sync.models import (
     DHCPClientTableDiff,
 )
 
-
-NETWORK_SELECT_PROMPT = """Multiple Eero networks found, please select by ID
-                
-{network_options}
-
-Network ID"""
-
-
 class EeroAdGuardSyncHandler:
     def __init__(self, eero_client: EeroClient, adguard_client: AdGuardClient):
         self.eero_client = eero_client
         self.adguard_client = adguard_client
-        self.__network = self.__prompt_network()
+        self.__network = "0"
 
     @property
     def network(self) -> str:
         return self.__network
-
-    def __prompt_network(self) -> str:
-        network_list = self.eero_client.account()["networks"]["data"]
-        network_count = len(network_list)
-        if not network_list:
-            raise click.ClickException("No Eero networks associated with this account")
-        network_idx = 0
-        if network_count > 1:
-            network_options = "\n".join(
-                [f"{i}: {network['name']}" for i, network in enumerate(network_list)]
-            )
-            choice = click.Choice([str(i) for i in range(network_count)])
-            click.prompt(
-                NETWORK_SELECT_PROMPT.format(network_options=network_options),
-                type=choice,
-                default=str(network_idx),
-                show_choices=False,
-            )
-        network = network_list[network_idx]
-        click.echo(f"Selected network '{network['name']}'")
-        return network["url"]
 
     def create(self, diff: DHCPClientTableDiff):
         if not diff.discovered:
