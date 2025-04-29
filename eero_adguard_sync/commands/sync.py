@@ -12,7 +12,7 @@ from eero_adguard_sync.models import (
 
 
 NETWORK_SELECT_PROMPT = """Multiple Eero networks found, please select by ID
-                
+
 {network_options}
 
 Network ID"""
@@ -31,21 +31,26 @@ class EeroAdGuardSyncHandler:
     def __prompt_network(self) -> str:
         network_list = self.eero_client.account()["networks"]["data"]
         network_count = len(network_list)
+
         if not network_list:
             raise click.ClickException("No Eero networks associated with this account")
-        network_idx = 0
-        if network_count > 1:
+
+        if network_count == 1:
+            selected_idx = 0
+        else:
             network_options = "\n".join(
                 [f"{i}: {network['name']}" for i, network in enumerate(network_list)]
             )
-            choice = click.Choice([str(i) for i in range(network_count)])
-            click.prompt(
+            selected_idx = click.prompt(
                 NETWORK_SELECT_PROMPT.format(network_options=network_options),
-                type=choice,
-                default=str(network_idx),
+                type=click.Choice([str(i) for i in range(network_count)]),
+                default="0",
                 show_choices=False,
             )
-        network = network_list[network_idx]
+            selected_idx = int(selected_idx)  # <-- Important! Parse to int
+
+        # Now actually use the selected index
+        network = network_list[selected_idx]
         click.echo(f"Selected network '{network['name']}'")
         return network["url"]
 
@@ -63,6 +68,9 @@ class EeroAdGuardSyncHandler:
                         AdGuardClientDevice.from_dhcp_client(eero_device)
                     )
                 except HTTPError as e:
+                    if e.response.status_code == 400:
+                        click.secho(f"Skipped adding device '{eero_device.nickname}' due to bad data", fg="yellow")
+                        continue
                     errors = [
                         "client already exists",
                         "another client uses the same id",
