@@ -1,41 +1,32 @@
-name: Build on Tag
+name: Build and Push Docker Image to GHCR
 
 on:
   push:
-    tags:
-    - '*'
+    branches:
+      - master  # or "master" if your branch is named that
 
 permissions:
-  checks: write
+  contents: read
   packages: write
-      
+
 jobs:
-  docker:
-    name: Build Docker Image
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Login to GitHub Container Registry
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push
-        id: docker_build
+      - name: Build and Push Docker image
         uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
-          build-args: |
-            EAG_TAG=${{ github.ref_name }}
-          platforms: linux/amd64,linux/arm64
-          tags: | 
-              ghcr.io/brentoates/eero-adguard-sync:${{ github.ref_name }}
-              ghcr.io/brentoates/eero-adguard-sync:latest
+          tags: ghcr.io/${{ github.repository }}:latest
